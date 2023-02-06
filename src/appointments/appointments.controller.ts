@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   Query,
+  ValidationPipe,
 } from '@nestjs/common';
 import { start } from 'repl';
 import { AppointmentsService } from './appointments.service';
@@ -18,12 +19,20 @@ export class AppointmentsController {
   constructor(private readonly appointmentsService: AppointmentsService) {}
 
   @Post()
-  create(@Body() createAppointmentDto: CreateAppointmentDto) {
+  create(
+    @Body(new ValidationPipe({ skipMissingProperties: true }))
+    createAppointmentDto: CreateAppointmentDto,
+  ) {
+    console.log(
+      '%cappointments.controller.ts line:22 createAppointmentDto',
+      'color: #007acc;',
+      createAppointmentDto,
+    );
     return this.appointmentsService.create(createAppointmentDto);
   }
 
   @Get()
-  findAll(@Query('start') start, @Query('end') end) {
+  findAll(@Query('start') start: Date, @Query('end') end: Date) {
     return this.appointmentsService.findAll(start, end);
   }
 }

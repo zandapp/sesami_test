@@ -1,9 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
-import { AppModule } from './../src/app.module';
+import { AppModule } from '../src/app.module';
 
-describe('AppController (e2e)', () => {
+describe('Appointment (e2e)', () => {
   let app: INestApplication;
 
   beforeEach(async () => {
@@ -15,10 +15,18 @@ describe('AppController (e2e)', () => {
     await app.init();
   });
 
-  it('/ (GET)', () => {
+  it('/appointments (GET)', () => {
+    console.log(
+      '%cappointment.e2e-spec.ts line:19 new Date()',
+      'color: #007acc;',
+      new Date(),
+    );
     return request(app.getHttpServer())
-      .get('/')
-      .expect(200)
-      .expect('Hello World!');
+      .post('/appointments')
+      .send({
+        start: 'invalid',
+        end: '2023-02-06T09:15:02.179Z',
+      })
+      .expect(400);
   });
 });

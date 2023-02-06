@@ -6,9 +6,10 @@ import { Appointment, appointmentSchema } from './entities/appointment.entity';
 
 describe('AppointmentsService', () => {
   let service: AppointmentsService;
-  const start = new Date('2022-11-03T13:34:38.306Z');
-  const end = new Date('2022-11-04T13:34:38.306Z');
-  const _id = '6354e7a09fab41020fd5207f';
+  const start = new Date('2022-05-03T13:30:00');
+  const end = new Date('2022-05-03T14:30:00');
+  let _id;
+  let secondAppointment;
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       imports: [
@@ -24,41 +25,67 @@ describe('AppointmentsService', () => {
     service = module.get<AppointmentsService>(AppointmentsService);
   });
 
-  it('should be defined', () => {
-    expect(service).toBeDefined();
-  });
   it('creates an appointment', async () => {
     const appointmentSpy = jest.spyOn(service, 'create');
 
-    await service.create({
+    const appointment = await service.create({
       start,
       end,
     });
+    _id = appointment._id;
 
     expect(appointmentSpy).toHaveBeenCalled();
     expect(appointmentSpy).toBeDefined();
+    expect(appointment.start).toEqual(start);
+  });
+
+  it('throws exception on duplicate appointment ', async () => {
+    const appointmentSpy = jest.spyOn(service, 'create');
+    try {
+      const appointment = await service.create({
+        start: new Date('2022-05-03T13:35:38'),
+        end,
+      });
+    } catch (e) {
+      expect(e).rejects;
+    }
   });
   it('updates an appointment', async () => {
     const appointmentSpy = jest.spyOn(service, 'update');
 
     const appointment = await service.create({
       _id: new Types.ObjectId(_id),
-      start: new Date('2022-01-03T13:34:38.306Z'),
-      end: new Date('2022-01-04T13:34:38.306Z'),
+      start: new Date('2022-05-03T13:35:38'),
+      end: new Date('2022-05-03T13:36:38'),
     });
 
     expect(appointmentSpy).toHaveBeenCalled();
     expect(appointmentSpy).toBeDefined();
+    expect(appointment.history.length).toBeGreaterThan(0);
   });
-  it('throws exception on duplicate appointment ', async () => {
+  it('not throws exception on another appointment ', async () => {
     const appointmentSpy = jest.spyOn(service, 'create');
-    try {
-      await service.create({
-        start,
-        end,
-      });
-    } catch (e) {
-      expect(e).rejects;
-    }
+    const appointment = await service.create({
+      start: new Date('2022-05-03T17:30:00'),
+      end: new Date('2022-05-03T18:30:00'),
+    });
+    secondAppointment = appointment._id;
+
+    expect(appointment._id).toBeDefined();
+  });
+  it('retrives appointments between given dates', async () => {
+    const appointments = await service.findAll(
+      new Date('2022-05-03T17:00:00'),
+      new Date('2022-05-03T18:30:00'),
+    );
+    expect(appointments.length).toBe(1);
+  });
+  it('deletes appointment', async () => {
+    const appointmentSpy = jest.spyOn(service, 'delete');
+
+    const a = await service.delete(_id);
+    const b = await service.delete(secondAppointment);
+    expect(a.deletedCount).toBe(1);
+    expect(b.deletedCount).toBe(1);
   });
 });

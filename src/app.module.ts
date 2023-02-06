@@ -15,6 +15,7 @@ import { AppointmentsModule } from './appointments/appointments.module';
         return { uri: configService.get('DB_URL') };
       },
     }),
+
     AppointmentsModule,
   ],
   controllers: [AppController],

@@ -11,6 +11,9 @@ export class Appointment extends Document {
   createdAt: Date;
   @Prop()
   updatedAt: Date;
+
+  @Prop()
+  deletedAt: Date;
   @Prop({ type: Object, default: [] })
   history: Object[];
 }
